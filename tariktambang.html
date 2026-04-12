@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaisar Master</title>
+
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background: #cce7ff;
+    text-align: center;
+    margin: 0;
+}
+
+h1 {
+    color: #ff4444;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.player {
+    width: 40%;
+}
+
+.question {
+    font-size: 20px;
+    margin: 10px;
+}
+
+input {
+    font-size: 18px;
+    padding: 5px;
+    width: 80%;
+}
+
+.buttons button {
+    width: 30%;
+    padding: 10px;
+    margin: 3px;
+    font-size: 16px;
+}
+
+.game-area {
+    position: relative;
+    margin: 20px;
+    height: 150px;
+}
+
+.character {
+    position: absolute;
+    top: 40px;
+    font-size: 50px;
+}
+
+.left-char { left: 10px; }
+.right-char { right: 10px; }
+
+.rope {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    width: 200px;
+    height: 5px;
+    background: #654321;
+    transform: translateX(-50%);
+}
+
+.marker {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: red;
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+#message {
+    font-size: 20px;
+    color: green;
+}
+
+.footer {
+    font-size: 12px;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Kaisar Master</h1>
+
+<div id="countdown"></div>
+
+<div class="game-area">
+    <div class="character left-char">👦</div>
+    <div class="character right-char">👦</div>
+    <div class="rope">
+        <div class="marker" id="marker"></div>
+    </div>
+</div>
+
+<p>Jawab soal untuk menarik tali</p>
+
+<div class="container">
+    <!-- Player 1 -->
+    <div class="player">
+        <div class="question" id="q1"></div>
+        <input type="text" id="a1" readonly>
+        <div class="buttons" id="btn1"></div>
+    </div>
+
+    <!-- Player 2 -->
+    <div class="player">
+        <div class="question" id="q2"></div>
+        <input type="text" id="a2" readonly>
+        <div class="buttons" id="btn2"></div>
+    </div>
+</div>
+
+<div id="message"></div>
+
+<div class="footer">
+    Creator: purnama Grisaleli
+</div>
+
+<script>
+let pos = 0;
+let score1 = 0;
+let score2 = 0;
+let total = 0;
+
+function generateQuestion() {
+    let a = Math.floor(Math.random() * 10);
+    let b = Math.floor(Math.random() * 10);
+    return {
+        text: `${a} + ${b} = ?`,
+        answer: a + b
+    };
+}
+
+let q1 = generateQuestion();
+let q2 = generateQuestion();
+
+document.getElementById("q1").innerText = q1.text;
+document.getElementById("q2").innerText = q2.text;
+
+function createButtons(container, inputId, player) {
+    let el = document.getElementById(container);
+    for (let i = 0; i <= 9; i++) {
+        let btn = document.createElement("button");
+        btn.innerText = i;
+        btn.onclick = () => {
+            document.getElementById(inputId).value += i;
+        };
+        el.appendChild(btn);
+    }
+
+    let clear = document.createElement("button");
+    clear.innerText = "C";
+    clear.onclick = () => document.getElementById(inputId).value = "";
+    el.appendChild(clear);
+
+    let go = document.createElement("button");
+    go.innerText = "Go";
+    go.onclick = () => checkAnswer(player);
+    el.appendChild(go);
+}
+
+createButtons("btn1", "a1", 1);
+createButtons("btn2", "a2", 2);
+
+function checkAnswer(player) {
+    let input = document.getElementById(player === 1 ? "a1" : "a2");
+    let answer = parseInt(input.value);
+
+    let correct = player === 1 ? q1.answer : q2.answer;
+
+    if (answer === correct) {
+        if (player === 1) {
+            pos -= 10;
+            score1++;
+        } else {
+            pos += 10;
+            score2++;
+        }
+
+        document.getElementById("marker").style.left = `calc(50% + ${pos}px)`;
+
+        total++;
+
+        if (total >= 7) {
+            if (score1 > score2) {
+                document.getElementById("message").innerText = "Selamat Kamu menang (Kiri)";
+            } else {
+                document.getElementById("message").innerText = "Selamat Kamu menang (Kanan)";
+            }
+            return;
+        }
+
+        q1 = generateQuestion();
+        q2 = generateQuestion();
+
+        document.getElementById("q1").innerText = q1.text;
+        document.getElementById("q2").innerText = q2.text;
+    }
+
+    input.value = "";
+}
+
+// Countdown
+let count = 3;
+let cd = document.getElementById("countdown");
+
+let interval = setInterval(() => {
+    if (count > 0) {
+        cd.innerText = count;
+    } else if (count === 0) {
+        cd.innerText = "Mulai!";
+    } else {
+        cd.innerText = "";
+        clearInterval(interval);
+    }
+    count--;
+}, 1000);
+
+</script>
+
+</body>
+</html>
